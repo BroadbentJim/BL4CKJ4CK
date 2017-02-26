@@ -46,7 +46,7 @@ def split(hand, hand2):
 def double(hand):
     initial_hit(hand)
     strategy.append("Double")
-    print("Double V")
+    #print("Double V")
     return 2
 
 def stay(hand):
@@ -111,45 +111,47 @@ def perfect_strategy(Pand, Pand2, Dand):
     global true_count
     # print(hardtotal)
     var = 1
-    if score(Pand) == 16 and score([Dand[0]]) == 10:
+    #Count based logic
+
+    if score(Pand) == 16 and score([Dand[0]]) == 10: #16 vs 10
         if true_count > 0:
             if split_style(Pand, Pand2, Dand) == True:
                 split(Pand, Pand2)
-                print("Score = 16, dealer score = 10, true count +ve and splittable")
+                #print("Score = 16, dealer score = 10, true count +ve and splittable")
             else:
-                print("Score = 16, dealer score = 10, true count +ve and  NOT splittable")
+                #print("Score = 16, dealer score = 10, true count +ve and  NOT splittable")
                 stay(Pand)
         else:
             hit(Pand)
-    elif score(Pand) == 15 and score([Dand[0]]) == 10:
+    elif score(Pand) == 15 and score([Dand[0]]) == 10: #15 vs 10
         if true_count >= 4:
             if split_style(Pand, Pand2, Dand) == True:
-                print("Score = 15, dealer score = 10, true count 4+ and splittable")
+                #print("Score = 15, dealer score = 10, true count 4+ and splittable")
                 split(Pand, Pand2)
             else:
-                print("Score = 15, dealer score = 10, true count 4+ and  NOT splittable")
+                #print("Score = 15, dealer score = 10, true count 4+ and  NOT splittable")
                 stay(Pand)
         else:
-            print("Score = 15, dealer score = 10, true count -4")
+            #print("Score = 15, dealer score = 10, true count -4")
             hit(Pand)
-    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and score([Pand[1]]) == 10 and score([Dand[0]]) == 5:
+    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and score([Pand[1]]) == 10 and score([Dand[0]]) == 5: #10 vs 5
         if true_count >= 5:
-            print("Splittable, score = 20, dealer = 6, true count 5+")
+            #print("Splittable, score = 20, dealer = 6, true count 5+")
             split(Pand, Pand2)
         else:
-            print("Splittable, score = 20, dealer = 6, true count -5")
+            #print("Splittable, score = 20, dealer = 6, true count -5")
             stay(Pand)
-    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and 10 and score([Pand[1]]) == 10 and score([Dand[0]]) == 6:
+    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and 10 and score([Pand[1]]) == 10 and score([Dand[0]]) == 6: #10 vs 6
         if true_count >= 4:
             split(Pand, Pand2)
         else:
             stay(Pand)
-    elif score(Pand) == 10 and score([Dand[0]]) == 10:
+    elif score(Pand) == 10 and score([Dand[0]]) == 10: #10 vs 10
         if true_count >= 4:
             var = double(Pand)
         else:
             hit(Pand)
-    elif score(Pand) == 12 and score([Dand[0]]) == 3:
+    elif score(Pand) == 12 and score([Dand[0]]) == 3:#12 vs 3
         if true_count >= 2:
             if split_style(Pand, Pand2, Dand) == 1:
                 split(Pand, Pand2)
@@ -157,7 +159,7 @@ def perfect_strategy(Pand, Pand2, Dand):
                 stay(Pand)
         else:
             hit(Pand)
-    elif score(Pand) == 12 and score([Dand[0]]) == 2:
+    elif score(Pand) == 12 and score([Dand[0]]) == 2: #12 vs 2
         if true_count >= 3:
             if split_style(Pand, Pand2, Dand) == 1:
                 split(Pand, Pand2)
@@ -165,17 +167,17 @@ def perfect_strategy(Pand, Pand2, Dand):
                 stay(Pand)
         else:
             hit(Pand)
-    elif score(Pand) == 11 and score ([Dand[0]]) == 11:
+    elif score(Pand) == 11 and score ([Dand[0]]) == 11:#11 vs 11
         if true_count >= 1:
             var = double(Pand)
         else:
             hit(Pand)
-    elif score(Pand) == 9 and score([Dand[0]]) == 2:
+    elif score(Pand) == 9 and score([Dand[0]]) == 2:#9 vs 2
         if true_count >= 1:
             var = double(Pand)
         else:
             hit(Pand)
-    elif score(Pand) == 10 and score([Dand[0]]) == 11:
+    elif score(Pand) == 10 and score([Dand[0]]) == 11:#10 vs 11
         if true_count >= 4:
             var = double(Pand)
         else:
@@ -460,7 +462,7 @@ def game(loop):
     'Percentage netgain': net_gain_per,
     'Percentage winrate': win_rate,
     "Strategy" : strategy,
-    "Time Taken": elapsed_time}
+    "Time": elapsed_time}
     return dictionary
 
 if __name__ == "__main__":
