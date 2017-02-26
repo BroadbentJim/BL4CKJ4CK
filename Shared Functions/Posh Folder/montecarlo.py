@@ -205,21 +205,6 @@ def update_matrices_stay(hand1, hand2, Result):
 def random_playing(hand):
     random.choice([stay(), hit(hand)])
 
-def choose_player_strategy(strategy, want):
-    if strategy == "Simple":
-        pass
-        #do simple strategy
-        #return simple_strategy(want)
-    elif strategy == "Monte":
-        pass
-        #Do Monte Carlo
-    elif strategy == "Basic":
-        basic_playing()
-    elif strategy == "Perfect":
-        pass
-        #perfect strategy
-    else:
-        print("That's bad")
 
 
 def update_matrices_hit(Phand, Dhand, Result):
@@ -288,9 +273,8 @@ def create_results(loop):
     return dictionary, Hit_Ratio_Matrix
 
 
-def game(loop, strategy, wanted):
-    global player_wins, split_player_wins
-    global dealer_wins, split_dealer_wins
+def game(loop):
+    player_wins = dealer_wins = split_player_wins = split_dealer_wins = 0
     global Deck, Phand, Phand2, Dhand, Split
     global Bust_counter
     start_time = time.time()
@@ -306,9 +290,8 @@ def game(loop, strategy, wanted):
         Phand2 = []
         #new_deck()
         deal()
-        choose_player_strategy(strategy, wanted)
-        # if len(Phand2) > 0:
-        #     monte_carlo(Phand2, Dhand)
+        if len(Phand2) > 0:
+            monte_carlo(Phand2, Dhand)
         #random_playing(Phand)
         dealer()
         if compare(Phand, Dhand) == 1:
@@ -395,8 +378,34 @@ def game(loop, strategy, wanted):
 
 
     Resultspos = np.linspace(50, loop, loop/50)
-    dictionary, HRM = create_results(loop)
-    return dictionary, HRM
+
+    # calculate some nice numbers
+    finish_time = time.time()
+    elapsed_time = finish_time - start_time
+    split_games = split_player_wins + split_dealer_wins
+    total_games = loop + split_games
+    total_player_wins = player_wins + split_player_wins
+    total_dealer_wins = dealer_wins + split_dealer_wins
+    net_gain_abs = total_player_wins - total_dealer_wins  # abs is short for absolute
+    net_gain_per = net_gain_abs / total_dealer_wins
+    win_rate = round(total_player_wins / total_games * 100, 2)
+    # Calculate how many times the player did each move
+    hits = strategy.count("Hit")
+    stays = strategy.count("Stay")
+    splits = strategy.count("Split")
+    doubles = strategy.count("Doubles")
+
+    # Calculate the ratios between Hit Matrix and Total matrix
+    Hit_Ratio_Matrix = Hit_Matrix / Total_Matrix
+    dictionary = {'Total Games': total_games,
+                  'Total player wins': total_player_wins,
+                  'Total dealer wins': total_dealer_wins,
+                  'Percentage netgain': net_gain_per,
+                  'Percentage winrate': win_rate,
+                  "Strategy": strategy,
+                  "Time": elapsed_time}
+    return dictionary, Hit_Ratio_Matrix
+
 
 
 # if __name__ == "__main__":

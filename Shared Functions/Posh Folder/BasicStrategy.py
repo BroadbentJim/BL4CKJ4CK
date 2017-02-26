@@ -3,12 +3,11 @@ import time
 
 
 
-global bust
-global Stay
 player_wins = 0
 dealer_wins = 0
 split_player_wins = 0
 split_dealer_wins = 0
+global hardtotal
 hardtotal = False
 
 
@@ -64,12 +63,11 @@ def bust(hand):
         return "not "
 
 def score(hand):
+    global hardtotal
     total = 0
     Aces = 0
     hardtotal = True
-    #print ("The length of hand is " + str(len(hand)))
     for cards in hand:
-        #print("The card is " + str(cards))
         if cards == "J" or cards == "Q" or cards == "K":
             total += 10
         elif cards == "A":
@@ -92,6 +90,7 @@ def score(hand):
 
 
 def basic_strategy(Pand, Dand): #Basic Strategy
+    global hardtotal
     if split_style(Pand, Dand) == True:
         split(Pand)
     elif hardtotal == False:
@@ -143,26 +142,18 @@ def compare(hand1, hand2): #True means Hand1 has won, False means hand2 has won.
             return 1.5
 
     if score(hand1) <= 21 and score(hand2) > 21:
-        #player_wins += 1
-        #return "Player won."
         return 1
     elif score(hand1) > 21 and score(hand2) <= 21:
-        #dealer_wins += 1
         return 0
     elif score(hand1) > score(hand2) and score(hand1)<= 21:
-        #player_wins += 1
-        #return "Player won."
+
         return 1
     else:
-        #dealer_wins += 1
-        #return "Dealer won"
         return 0
 
 def game(loop):
-    global player_wins, split_player_wins
-    global dealer_wins, split_dealer_wins
     global Deck, Phand, Phand2, Dhand
-    #print("Hold up hey")
+    player_wins = dealer_wins = split_player_wins = split_dealer_wins = 0
     start_time = time.time()
     new_deck()
 

@@ -2,15 +2,10 @@ import random
 import time
 
 
-
-global bust
-global Stay
 player_wins = 0
 dealer_wins = 0
 split_player_wins = 0
 split_dealer_wins = 0
-hardtotal = False
-
 
 Deck=[]
 Phand=[]
@@ -143,7 +138,7 @@ def game(loop, want):
     global Deck, Phand, Phand2, Dhand
     player_wins = dealer_wins = split_player_wins = split_dealer_wins = 0
     new_deck()
-
+    start_time = time.time()
     for _ in range(loop):
         #Deck = []
         Phand = []
@@ -168,15 +163,14 @@ def game(loop, want):
         if len(Deck) <= 52:
             new_deck()
 
+    finish_time = time.time()
+    elapsed_time = finish_time - start_time
     split_games = split_player_wins + split_dealer_wins
     total_games = loop + split_games
     total_player_wins = player_wins + split_player_wins
     total_dealer_wins = dealer_wins + split_dealer_wins
     net_gain_abs = total_player_wins - total_dealer_wins #abs is short for absolute
-    try:
-        net_gain_per = net_gain_abs/total_dealer_wins
-    except:
-        net_gain_per = 0
+    net_gain_per = net_gain_abs / total_dealer_wins
     win_rate = round(total_player_wins / total_games * 100, 2)
     #Calculate how many times the player did each move
     hits = strategy.count("Hit")
@@ -191,7 +185,7 @@ def game(loop, want):
     'Total dealer wins': total_dealer_wins,
     'Percentage netgain': net_gain_per,
     'Percentage winrate': win_rate,
-    "Strategy" : strategy}
+    "Time": elapsed_time}
     return dictionary
 
 

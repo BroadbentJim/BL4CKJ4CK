@@ -29,7 +29,8 @@ class SampleApp(tk.Tk):
 
         self.shared_data = {
             "strategy": tk.StringVar(),
-            "results": {}
+            "results": {},
+            "HRM": np.zeros([18,10])
         }
 
         self.frames = {}
@@ -77,7 +78,7 @@ class StartPage(tk.Frame):
         maintext.pack(pady=20, padx=10)
 
         button1 = tk.Button(self, text="Continue",
-                             command=lambda: controller.show_frame("Main_Page"))
+                             command=lambda: controller.show_frame("Input_Page"))
         button1.pack()
 
         button2 = tk.Button(self, text="Quit",
@@ -156,16 +157,29 @@ class Input_Page(tk.Frame):
             pass
             #results = perfect(numberofsims)
         elif strategy == "Monte Carlo":
+            print("Got into Monte Carlo")
             results, HRM = monte(numberofsims)
-            return results, HRM
-        self.controller.show_frame("Results")
-        print(results["winrate"])
+            #print(HRM)
+            self.controller.shared_data["HRM"] = HRM
+
+        print(results["Percentage winrate"])
         self.controller.shared_data["results"] = results
+        self.popup(results)
+        self.controller.show_frame("Results")
 
-
+    def popup(self, results):
+        top = tk.Toplevel()
+        top.geometry("600x600")
+        top.title("Simulation Finished")
+        maintext = tk.Label(top, text="The simulation finished! Hurrah", font=TITLE_FONT)
+        maintext.pack()
+        timetext = "The simulation took " + str(results["Time"])
+        timetaken = tk.Label(top, text=timetext, font=LARGE_FONT)
+        timetaken.pack()
+        close = tk.Button(top,text="See more results", command=top.destroy)
+        close.pack()
 
     def Toggle(self):
-        #print("1>2")
         if self.strategy.get() == "Simple":
             print(self.strategy.get())
             self.basicbutton.config(state=tk.NORMAL)
@@ -221,9 +235,10 @@ class Results(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="This is the results Page", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("StartPage"))
-        button.pack()
+        self.results = self.controller.shared_data["results"]
+
+
+        #Show results
 
         self.saving = tk.BooleanVar()
         tosaveornottosave = tk.Checkbutton(self, text="Save results to file", variable=self.saving, command=self.toggle)
@@ -260,22 +275,23 @@ class GraphPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        self.strategy = self.controller.shared_data["strategy"]
+        strategy = self.controller.shared_data["strategy"]
+
 
         label = tk.Label(self, text="This is the graph page", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("StartPage"))
-        button.pack()
+        # button = tk.Button(self, text="Go to the start page",
+        #                    command=lambda: controller.show_frame("StartPage"))
+        # button.pack()
 
-        GraphTypes = ['Normal Distrubition', 'Net gain over time']
+        GraphTypes = ['Normal Distrubition', 'Net gain over time', 'Histogram']
         graph = tk.StringVar()
         graph.set(GraphTypes[0])
 
         dropdown = tk.OptionMenu(self, graph, *GraphTypes)
         dropdown.pack()
 
-        if self.strategy == "Monte Carlo":
+        if strategy.get() == "Monte Carlo":
 
             self.HRMVar = tk.BooleanVar()
             self.HRMVar.set(False)
