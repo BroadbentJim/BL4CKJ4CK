@@ -397,16 +397,31 @@ def game(loop):
 
     # Calculate the ratios between Hit Matrix and Total matrix
     Hit_Ratio_Matrix = Hit_Matrix / Total_Matrix
+    print(Results)
     dictionary = {'Total Games': total_games,
                   'Total player wins': total_player_wins,
                   'Total dealer wins': total_dealer_wins,
                   'Percentage netgain': net_gain_per,
                   'Percentage winrate': win_rate,
                   "Strategy": strategy,
-                  "Time": elapsed_time}
+                  "Time": elapsed_time,
+                  "Netgain over time": Results}
     return dictionary, Hit_Ratio_Matrix
 
+def simulations(loop):
+    gains = []
+    start_time = time.time()
+    for i in range(99):
+        gains.append(game(loop)["Percentage netgain"])
+    dictionary, Hit_Ratio_Matrix = game(loop)
+    finish_time = time.time()
+    elapsed_time = finish_time - start_time
+    dictionary["Time"] = elapsed_time
+    gains.append(dictionary["Percentage netgain"])
 
+    dictionary["Gainz"] = gains
+    #print(dictionary)
+    return dictionary, Hit_Ratio_Matrix
 
 # if __name__ == "__main__":
 #     numberofsims = int(input("Please input the number of times you would like to loop "))

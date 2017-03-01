@@ -1,7 +1,7 @@
 import random
 import time
 
-#global hardtotal
+
 global true_count
 hardtotal = False
 Deck=[]
@@ -44,14 +44,17 @@ def split(hand, hand2):
     strategy.append("Split")
 
 def double(hand):
+    global Stay
     initial_hit(hand)
     strategy.append("Double")
     #print("Double V")
+    Stay = True
     return 2
 
 def stay(hand):
+    global Stay
     strategy.append("Stay")
-    return
+    Stay = True
 
 def deal(Phand, Dhand):
     initial_hit(Phand)
@@ -134,14 +137,14 @@ def perfect_strategy(Pand, Pand2, Dand):
         else:
             #print("Score = 15, dealer score = 10, true count -4")
             hit(Pand)
-    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and score([Pand[1]]) == 10 and score([Dand[0]]) == 5: #10 vs 5
+    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and len(Pand2) == 0 and score([Dand[0]]) == 5: #10 vs 5
         if true_count >= 5:
             #print("Splittable, score = 20, dealer = 6, true count 5+")
             split(Pand, Pand2)
         else:
             #print("Splittable, score = 20, dealer = 6, true count -5")
             stay(Pand)
-    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and 10 and score([Pand[1]]) == 10 and score([Dand[0]]) == 6: #10 vs 6
+    elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and len(Pand2) == 0 and score([Dand[0]]) == 6: #10 vs 6
         if true_count >= 4:
             split(Pand, Pand2)
         else:
@@ -238,6 +241,7 @@ def perfect_strategy(Pand, Pand2, Dand):
     elif split_style(Pand, Pand2, Dand) == True:
         split(Pand, Pand2)
     elif hardtotal == False:
+        # print("hardtotal = False")
         if score(Pand) == 13 and score([Dand[0]]) > 4 and score([Dand[0]]) < 7:
             var = double(Pand)
         elif score(Pand) == 14 and score([Dand[0]]) > 4 and score([Dand[0]]) < 7:
@@ -256,7 +260,9 @@ def perfect_strategy(Pand, Pand2, Dand):
             hit(Pand)
         else:
             stay(Pand)
-    elif hardtotal == False:
+
+    elif hardtotal == True:
+        # print("hardtotal = True")
         if score(Pand) == 9 and score([Dand[0]]) > 2 and score([Dand[0]]) < 7:
             var = double(Pand)
         elif score(Pand) == 10 and score([Dand[0]]) < 10:
@@ -383,6 +389,8 @@ def game(loop):
     global Deck
     global running_count
     global true_count
+    global Stay
+    Stay = False
     #this global variable holds the deck
     #Create and set to zero score variables
     player_wins, dealer_wins, split_player_wins, split_dealer_wins = (0,)*4
@@ -393,7 +401,7 @@ def game(loop):
     prehand_count, running_count, true_count = (0,)*3
 
 
-    for _ in range(loop):
+    for i in range(loop):
         #Loop for required number
         #Create empty arrays to hold the hands
 
@@ -410,27 +418,41 @@ def game(loop):
         deal(Phand, Dhand)
         #Play out the player hands
         weight *= perfect_strategy(Phand, Phand2, Dhand)
+        while Stay != True:
+            perfect_strategy(Phand, Phand2, Dhand)
+            # print("Strategied")
+        Stay = False
         if len(Phand2) > 0:
             weight *= perfect_strategy(Phand2, Phand, Dhand)
+            while Stay != True:
+                perfect_strategy(Phand2, Phand, Dhand)
+                # print("Strategied")
         #Play out the dealer strategy
         dealer(Dhand)
         #Begin comparison of hands and score
+        # if score(Phand) < 12 and strategy[-1:] != ['Double']:
+        #     print(strategy[-1:])
+        #     print("Phand",Phand)
+        #     print("Phand2",Phand2)
+        #     print(i)
+        #     break
         if compare(Phand, Dhand) == 1:
             player_wins += 1*weight*wager
         elif compare(Phand, Dhand) == 1.5:
             player_wins += 1.5*weight*wager
         else:
-            dealer_wins += 1*wager
+            dealer_wins += 1*wager*weight
         if len(Phand2) > 0:
             if compare(Phand2, Dhand) == 1:
-                split_player_wins += 1*wager
+                split_player_wins += 1*wager*weight
             elif compare(Phand2, Dhand) == 1.5:
-                split_player_wins += 1.5*wager
+                split_player_wins += 1.5*wager*weight
             else:
-                split_dealer_wins += 1*wager
+                split_dealer_wins += 1*wager*weight
         if len(Deck) <= 52:
             Deck = new_deck()
         prehand_count = true_count
+        Stay = False
 
     #Calculate time
     finish_time = time.time()
@@ -462,13 +484,28 @@ def game(loop):
     'Percentage netgain': net_gain_per,
     'Percentage winrate': win_rate,
     "Strategy" : strategy,
-    "Time": elapsed_time}
+    "Time": elapsed_time,}
+    return dictionary
+
+def simulations(loop):
+    gains = []
+    start_time = time.time()
+    for i in range(99):
+        gains.append(game(loop)["Percentage netgain"])
+    dictionary = game(loop)
+    finish_time = time.time()
+    elapsed_time = finish_time - start_time
+    dictionary["Time"] = elapsed_time
+    gains.append(dictionary["Percentage netgain"])
+
+    dictionary["Gainz"] = gains
+    #print(dictionary)
     return dictionary
 
 if __name__ == "__main__":
     sims = int(input("Please input the number of times you would like to loop "))
     dictionary = game(sims)
-    print("Time taken: ", dictionary["Time Taken"])
+    print("Time taken: ", dictionary["Time"])
     print("Netgain: ", round(dictionary["Percentage netgain"], 2), "%")
     print("Winrate: ", dictionary["Percentage winrate"], "%")
     print("Times hit: ", dictionary["Strategy"].count("Hit"))

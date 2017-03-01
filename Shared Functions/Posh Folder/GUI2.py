@@ -1,10 +1,17 @@
 import tkinter as tk   # python3
-import datetime
-import os
+#import tkinter.ttk as ttk
+import datetime, os
 import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from montecarlo import game as monte
-from BasicStrategy import game as basic
-from SimpleStrategy import game as simple
+from BasicStrategy import simulations as basic
+from SimpleStrategy import simulations as simple
+from PerfectStrategy import simulations as perfect
 
 TITLE_FONT = ("Helvetica", 18, "bold")
 LARGE_FONT= ("Verdana", 12)
@@ -154,11 +161,13 @@ class Input_Page(tk.Frame):
         elif strategy == "Basic":
             results = basic(numberofsims)
         elif strategy == "Perfect":
-            pass
-            #results = perfect(numberofsims)
+            results = perfect(numberofsims)
         elif strategy == "Monte Carlo":
             print("Got into Monte Carlo")
-            results, HRM = monte(numberofsims)
+            from montecarlo import game as game
+
+            # results, HRM = monte(numberofsims)
+            results, HRM = game(numberofsims)
             #print(HRM)
             self.controller.shared_data["HRM"] = HRM
 
@@ -236,6 +245,9 @@ class Results(tk.Frame):
         label = tk.Label(self, text="This is the results Page", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
         self.results = self.controller.shared_data["results"]
+        # tree = ttk.Treeview(self)
+        # tree.insert('', 'end', 'widgets', text='Widget Tour')
+        # tree.pack()
 
 
         #Show results
@@ -275,7 +287,7 @@ class GraphPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        strategy = self.controller.shared_data["strategy"]
+        self.strategy = self.controller.shared_data["strategy"]
 
 
         label = tk.Label(self, text="This is the graph page", font=TITLE_FONT)
@@ -284,14 +296,14 @@ class GraphPage(tk.Frame):
         #                    command=lambda: controller.show_frame("StartPage"))
         # button.pack()
 
-        GraphTypes = ['Normal Distrubition', 'Net gain over time', 'Histogram']
-        graph = tk.StringVar()
-        graph.set(GraphTypes[0])
+        GraphTypes = ['Normal Distribution', 'Net gain over time', 'Histogram']
+        self.graph = tk.StringVar()
+        self.graph.set(GraphTypes[0])
 
-        dropdown = tk.OptionMenu(self, graph, *GraphTypes)
+        dropdown = tk.OptionMenu(self, self.graph, *GraphTypes)
         dropdown.pack()
 
-        if strategy.get() == "Monte Carlo":
+        if self.strategy.get() == "Monte Carlo":
 
             self.HRMVar = tk.BooleanVar()
             self.HRMVar.set(False)
@@ -302,8 +314,52 @@ class GraphPage(tk.Frame):
         startbtn.pack()
 
     def start(self):
-        pass
+        # top = tk.Toplevel()
+        # top.geometry("600x600")
+        # top.title("Graph Results")
+        # text = str(self.graph.get()) + " for "+ str(self.strategy.get())
+        # maintext = tk.Label(top, text=text, font=TITLE_FONT)
+        # maintext.pack()
+        self.equation(self.graph.get())
+        # f = Figure(figsize=(5,4), dpi=100)
+        # a = f.add_subplot(111)
+        # close = tk.Button(top, text="See more results", command=top.destroy)
+        # close.pack()
 
+    def equation(self, graphtype):
+        dictionary = self.controller.shared_data["results"]
+        if graphtype == "Histogram":
+            print(dictionary["Strategy"])
+            labels, values = zip(*Counter(dictionary["Strategy"]).items())
+
+            indexes = np.arange(len(labels))
+            width = 1
+
+            plt.bar(indexes, values, width)
+            text = str(self.graph.get()) + " for " + str(self.strategy.get())
+            plt.title(text)
+            plt.xticks(indexes + width * 0.5, labels)
+            plt.ylabel("Frequency")
+            plt.show()
+        if graphtype == 'Normal Distribution':
+            #print(dictionary["Gainz"])
+            plt.hist(dictionary["Gainz"], bins=100)
+            text = str(self.graph.get()) + " for " + str(self.strategy.get())
+            plt.title(text)
+            plt.show()
+        if graphtype == "Net gain over time":
+            games = dictionary["Total Games"]
+            x = np.linspace(0, games, games/50)
+            print(x)
+            y = dictionary["Netgain over time"]
+            print(y)
+            print(y)
+            plt.plot(x, y)
+            text = str(self.graph.get()) + " for " + str(self.strategy.get())
+            plt.xlabel("Simulation number")
+            plt.ylabel("Percentage Netgain")
+            plt.title(text)
+            plt.show()
 
 
 if __name__ == "__main__":

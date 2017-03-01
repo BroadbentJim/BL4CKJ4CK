@@ -1,6 +1,6 @@
 import random
 import time
-
+import numpy as np
 
 
 player_wins = 0
@@ -197,19 +197,36 @@ def game(loop):
     splits = strategy.count("Split")
     doubles = strategy.count("Doubles")
 
-
-
     dictionary = {'Total Games': total_games,
-    'Total player wins': total_player_wins,
-    'Total dealer wins': total_dealer_wins,
-    'Percentage netgain': net_gain_per,
-    'Percentage winrate': win_rate,
-    "Time": elapsed_time}
+                  'Total player wins': total_player_wins,
+                  'Total dealer wins': total_dealer_wins,
+                  'Percentage netgain': net_gain_per,
+                  'Percentage winrate': win_rate,
+                  "Strategy": strategy,
+                  "Time": elapsed_time, }
     return dictionary
 
+def simulations(loop):
+    gains = []
+    start_time = time.time()
+    for i in range(99):
+        gains.append(game(loop)["Percentage netgain"])
+    dictionary = game(loop)
+    finish_time = time.time()
+    elapsed_time = finish_time - start_time
+    dictionary["Time"] = elapsed_time
+    gains.append(dictionary["Percentage netgain"])
+
+    dictionary["Gainz"] = gains
+    #print(dictionary)
+    return dictionary
 
 #Debugging code
 
 if __name__ == "__main__":
-    ye = game(int(input("Please input the number of times you would like to loop ")))
-    print(ye["Percentage netgain"])
+    sims = int(input("Please input the number of times you would like to loop "))
+    dictionary = game(sims)
+    print("Time taken: ", dictionary["Time"])
+    print("Netgain: ", round(dictionary["Percentage netgain"], 2), "%")
+    print("Winrate: ", dictionary["Percentage winrate"], "%")
+    print("Times hit: ", dictionary["Strategy"].count("Hit"))
