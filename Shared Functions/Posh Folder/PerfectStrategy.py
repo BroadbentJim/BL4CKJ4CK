@@ -9,54 +9,118 @@ strategy=[]
 
 
 def new_deck():
+    """
+        New Deck Function:
+        Parameters: NONE
+        This function creates a Deck array and deals to it
+        THIS FUNCTION updates one global: running_count
+        It resets running_count when the deck is refreshed
+        returns:
+        Deck: The deck array that will hold the cards.
+
+    """
     global running_count
     Deck = []
-    one_suit=[2,3,4,5,6,7,8,9,10,"J", "Q", "K", "A"] #One suit
+    # Create deck array
+    one_suit = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]  # Defines One suit
     q = 0
-    while q < 24: #6 decks of 4 suits
-        for i in one_suit:
-            Deck.append(i)
-        q +=1
-    random.shuffle(Deck) #Randomly shuffle the hand
+    while q < 24:  # 6 decks of 4 suits
+        for i in one_suit:  # For each card in a suit
+            Deck.append(i)  # Add that card to the deck
+        q += 1
+    random.shuffle(Deck)  # Randomly shuffle the deck
     running_count = 0
     return Deck
 
 def obscure_hit(hand):
+    """
+    Obscure Hit
+    This hit is used for the dealer's 2nd card
+    Parameter(s): hand
+     hand: This hand is being hit. Should be the dealer's hand
+    :return:
+    """
     card = Deck.pop(0)
     hand.append(card)
 
 def initial_hit(hand):
+    """
+    Hit function used for dealing
+
+    Parameter(s): hand
+    hand: the hand that is being hit
+    This function is important as it doesn't update the strategy array
+    """
     card = Deck.pop(0) #Set card to be first card in deck and remove it
-    keep_running_count(card)
-    hand.append(card)
+    keep_running_count(card) #Take the running count of the card
+    hand.append(card) # Add the card to the hand array
 
 def hit(hand):
-    card = Deck.pop(0)
-    keep_running_count(card)
-    hand.append(card)
-    strategy.append("Hit")
+    """
+    Hit function used typically
+
+    Parameter(s): hand
+    hand: the hand that is being hit
+    This function is significant as it updates the strategy array providing a useful statistic to my client
+    """
+    card = Deck.pop(0)  # Set card to be first card in deck and remove it
+    keep_running_count(card) # Take the running count of the card
+    hand.append(card)  # Add the card to the hand array
+    strategy.append("Hit")  # Update the strategy array to reflect this move
 
 def split(hand, hand2):
-    card = hand.pop(0)
-    hand2.append(card)
-    initial_hit(hand)
+    """
+    Split Function
+    Parameter(s):
+    hand: The player's first hand typically Phand
+    hand2: The player's 2nd hand typically Phand2
+    :param hand2:
+    :return:
+    """
+    card = hand.pop(0)  # Remove a card from the first hand and save it as a variable
+    hand2.append(card)  # Add that card to the player's 2nd hand
+    initial_hit(hand)  # Silently hit both player hands
     initial_hit(hand2)
     strategy.append("Split")
 
 def double(hand):
+    """
+    Double Function
+    THIS FUNCTION CHANGES ONE GLOBAL Stay
+    Stay: Whether the plays stayed or not
+    hand: The player's first hand. Typically Phand
+    return 2 cause that is how I change the wager
+    """
+    #Declare the global stay
     global Stay
-    initial_hit(hand)
-    strategy.append("Double")
-    #print("Double V")
+
+    initial_hit(hand)#Hit the hand silently
+    strategy.append("Double")#Update the strategy array
     Stay = True
     return 2
 
 def stay(hand):
+    """
+    Stay Function:
+    This function will update the strategy array accordingly
+    THIS FUNCTION CHANGES ONE GLOBAL
+    Stay: It changes it cause it is the stay function
+    """
+    #Declare global variables
     global Stay
-    strategy.append("Stay")
+
+    strategy.append("Stay") #Update the strategy array
     Stay = True
 
 def deal(Phand, Dhand):
+    """
+    Deal function
+    Parameter(s): Phand, Dhand
+    NOTE TO SELF Change parameter name
+    Phand: The player's hand
+    Dhand: The dealer's hand
+    :return:
+    """
     initial_hit(Phand)
     initial_hit(Dhand)
     initial_hit(Phand)
@@ -78,43 +142,38 @@ def score(hand):
     This function returns the score to where it was called from
 """
     global hardtotal
+    # Create empty holder variables and reset hardtotal
     total = 0
     Aces = 0
     hardtotal = True
-    for cards in hand:
-        if cards == "J" or cards == "Q" or cards == "K":
-            total += 10
-        elif cards == "A":
+    for cards in hand:#iterate through every card in the hand array
+        if cards == "J" or cards == "Q" or cards == "K":  # if the card is a Jack, Queen, Kind
+            total += 10  # The score of the hand is increased by 10
+        elif cards == "A":  # If the card is an Ace
             total += 11
             Aces += 1
-            hardtotal = False
+            hardtotal = False  # Hardtotal is changed to reflect that the hand contains an Ace
         else:
-            total += cards
+            total += cards  # Otherwise just add the numerical value of the card to the total
 
-    while Aces > 0 and total > 21:
-        total -= 10
-        Aces -= 1
-    if Aces == 0:
-        hardtotal = True
+    while Aces > 0 and total > 21:  # If the total would cause the player to bust and there are ace(s)
+        total -= 10  # Take the Ace to be worth 1
+        Aces -= 1  # Decrement the number of aces
+    if Aces == 0:  # If no aces or all aces taken to be 1
+        hardtotal = True  # The hand is a hardtotal
 
     return total
 
 def perfect_strategy(Pand, Pand2, Dand):
     """
-
-
-
-
+    Perfect Strategy
     :param Pand:  Pand is the current player hand
     :param Pand2: Pand2 is the alternate player hand
     :param Dand:  Dand is the dealer hand
     :return: It returns whether the player has doubled or not
     """
 
-    global true_count
-    # print(hardtotal)
     var = 1
-    #Count based logic
 
     if score(Pand) == 16 and score([Dand[0]]) == 10: #16 vs 10
         if true_count > 0:
@@ -142,21 +201,26 @@ def perfect_strategy(Pand, Pand2, Dand):
             #print("Splittable, score = 20, dealer = 6, true count 5+")
             split(Pand, Pand2)
         else:
-            #print("Splittable, score = 20, dealer = 6, true count -5")
+            #print("Splittable, score = 20, dealer = 6, true count <5")
             stay(Pand)
     elif Pand[0] == Pand[1] and score([Pand[0]]) == 10 and len(Pand2) == 0 and score([Dand[0]]) == 6: #10 vs 6
         if true_count >= 4:
+            #Splittable, Score of dealer hand = 6 and true count>=4
             split(Pand, Pand2)
         else:
+            #True count <4
             stay(Pand)
     elif score(Pand) == 10 and score([Dand[0]]) == 10: #10 vs 10
         if true_count >= 4:
             var = double(Pand)
+            #If true_count >= 4, double
         else:
+            #True count <4
             hit(Pand)
     elif score(Pand) == 12 and score([Dand[0]]) == 3:#12 vs 3
         if true_count >= 2:
             if split_style(Pand, Pand2, Dand) == 1:
+                #If Split_style evaluates to true
                 split(Pand, Pand2)
             else:
                 stay(Pand)
@@ -345,6 +409,13 @@ def compare(hand1, hand2): #True means Hand1 has won, False means hand2 has won.
 
 
 def get_wager(ccount):
+    """
+    Choose player wager
+    Parameter(s): ccount
+    ccount: Current Count. The current true count
+    return var: The amount the player should bet
+    """
+    #The following if statements are self-explainatory
     if ccount >= 8:
         var = 5
     if ccount >= 6:
@@ -358,9 +429,17 @@ def get_wager(ccount):
     return var
 
 def keep_running_count(card):
+    """
+    Updates the running count
+    Parameter(s): card
+    card: The card updating the running count
+    THIS FUNCTION CHANGES 2 global variables
+    running_count and true_count
+    """
+    #Declare relevant globals
     global running_count
     global true_count
-
+    #If score less than 7, add 1. if score between 7 and 9, no change and if score > 10, minus 1
     if score([card])< 7:
         running_count += 1
     elif score([card]) < 10:
@@ -368,23 +447,31 @@ def keep_running_count(card):
     else:
         running_count -= 1
     #print("Decks currently in play:", int(len(Deck)/52))
+    #Calculate true_count
     try:
         true_count = running_count/int(len(Deck)/52)
     except:
         true_count = running_count
 
-def dealer(Dhand):
-    while score(Dhand) < 17:
-        initial_hit(Dhand)
+def dealer(hand):
+    """
+    Dealer function:
+    Parameter: hand
+    hand: The dealer's hand for which the logic must be followed
+    """
+    while score(hand) < 17: #While the dealer's score is less than 17
+        initial_hit(hand) #Invisibly hit the dealer's hand
 
 def game(loop):
     """
     Main Game Loop:
-    This function takes 2 arguments.
+    This function takes 1 arguments.
     loop: int which controls how many simulations to do
-    want: This controls to what value the simulations hit too
 
     This function controls all of the subfunctions that make up a game
+
+    This function returns a dictionary which should be consistent across all game types.
+    This allows for GUI to then show that data.
     """
     global Deck
     global running_count
@@ -401,11 +488,12 @@ def game(loop):
     prehand_count, running_count, true_count = (0,)*3
 
 
-    for i in range(loop):
+    for _ in range(loop):
         #Loop for required number
         #Create empty arrays to hold the hands
 
         wager = get_wager(prehand_count)
+        #Test code
         # print("Wager:", wager)
         # print("Running count", running_count)
         # print("Prehand count", prehand_count)
@@ -413,29 +501,34 @@ def game(loop):
         Phand = []
         Phand2 = []
         Dhand = []
+        #Create/reset a weight for the hand
         weight = 1
         #Deal to both hands
         deal(Phand, Dhand)
         #Play out the player hands
-        weight *= perfect_strategy(Phand, Phand2, Dhand)
+        weight *= perfect_strategy(Phand, Phand2, Dhand) #Times weight by whether the player doubled or not
         while Stay != True:
-            perfect_strategy(Phand, Phand2, Dhand)
+            #While the player hasn't stayed
+            perfect_strategy(Phand, Phand2, Dhand)#Don't change weight to reflect that you can only double once
             # print("Strategied")
         Stay = False
-        if len(Phand2) > 0:
-            weight *= perfect_strategy(Phand2, Phand, Dhand)
+        #Reset Stay for the dealer hand
+        if len(Phand2) > 0:#If have split
+            weight *= perfect_strategy(Phand2, Phand, Dhand)#Follow same logic for second hand. Change of Phand2 first
             while Stay != True:
-                perfect_strategy(Phand2, Phand, Dhand)
+                #While the player hasn't stayed
+                perfect_strategy(Phand2, Phand, Dhand)#Don't change weight to reflect that you can only double once
                 # print("Strategied")
         #Play out the dealer strategy
         dealer(Dhand)
-        #Begin comparison of hands and score
+        # Debug code. I was unsure whether a certain scenario was accounted for
         # if score(Phand) < 12 and strategy[-1:] != ['Double']:
         #     print(strategy[-1:])
         #     print("Phand",Phand)
         #     print("Phand2",Phand2)
         #     print(i)
         #     break
+        #Begin comparison of hands and score
         if compare(Phand, Dhand) == 1:
             player_wins += 1*weight*wager
         elif compare(Phand, Dhand) == 1.5:
@@ -451,18 +544,18 @@ def game(loop):
                 split_dealer_wins += 1*wager*weight
         if len(Deck) <= 52:
             Deck = new_deck()
-        prehand_count = true_count
+
+        prehand_count = true_count #The prehand count for the next hand is the true count at the end of this hand
         Stay = False
 
     #Calculate time
     finish_time = time.time()
     elapsed_time = finish_time - start_time
     #Calculate values about the game
-    split_games = split_player_wins + split_dealer_wins
-    total_games = loop + split_games
     total_player_wins = player_wins + split_player_wins
     total_dealer_wins = dealer_wins + split_dealer_wins
-    net_gain_abs = total_player_wins - total_dealer_wins #abs is short for absolute
+    total_games = total_dealer_wins + total_player_wins
+    net_gain_abs = total_player_wins - total_dealer_wins  # abs is short for absolute
 
     try:
         net_gain_per = net_gain_abs/total_dealer_wins

@@ -1,6 +1,6 @@
 import random
 import time
-
+import numpy as np
 
 player_wins = 0
 dealer_wins = 0
@@ -187,18 +187,27 @@ def game(loop, want):
                   "Time": elapsed_time, }
     return dictionary
 
-def simulations(loop):
+def simulations(loop, wanted):
     gains = []
+    winrates = []
     start_time = time.time()
     for i in range(99):
-        gains.append(game(loop)["Percentage netgain"])
-    dictionary = game(loop)
+        container = game(loop, wanted)
+        gains.append(container["Percentage netgain"])
+        winrates.append(container["Percentage winrate"])
+    dictionary = game(loop, wanted)
     finish_time = time.time()
     elapsed_time = finish_time - start_time
     dictionary["Time"] = elapsed_time
+    meangain = np.mean(gains)
+    meanwinrate = np.mean(winrates)
+    dictionary["Percentage netgain"] = meangain
+    dictionary["Percentage winrate"] = meanwinrate
     gains.append(dictionary["Percentage netgain"])
 
+
     dictionary["Gainz"] = gains
+    dictionary["winrates"] = winrates
     #print(dictionary)
     return dictionary
 
